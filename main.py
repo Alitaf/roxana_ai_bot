@@ -4,8 +4,8 @@ from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 
 # خواندن کلیدها از تنظیمات مخفی سرور
-GEMINI_KEY = os.getenv("AIzaSyAnQwmKRqSdoMbW6OOQgAMlOLMbpxgYswE")
-TELEGRAM_TOKEN = os.getenv("8687901520:AAHqsvH90wemum3_evMykNzmb9eFRC17mVs")
+GEMINI_KEY = os.getenv("GEMINI_KEY")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 genai.configure(api_key=GEMINI_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
