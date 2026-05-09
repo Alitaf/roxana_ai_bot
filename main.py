@@ -8,52 +8,44 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b"Roxana v3.1 is Online")
+        self.wfile.write(b"Roxana v3.1 is Active")
 
 def run_health_check():
-    port = int(os.environ.get("PORT", 10000))
-    server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
+    server = HTTPServer(('0.0.0.0', int(os.environ.get("PORT", 10000))), HealthCheckHandler)
     server.serve_forever()
 
-# ۲. تنظیمات API
+# ۲. تنظیمات
 genai.configure(api_key=os.getenv("GEMINI_KEY"))
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 
-# ۳. پردازشگر هوشمند بر اساس لیست مدل‌های اختصاصی شما
+# ۳. پردازشگر با مدل‌های لیست اختصاصی شما
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.text: return
     
-    # استفاده از دقیق‌ترین نام‌ها از لیست مجاز شما (May 2026)
+    # استفاده از مدل‌هایی که خود گوگل تایید کرده (models/gemini-3.1-flash-lite و غیره)
     target_models = [
-        'models/gemini-2.0-flash', 
         'models/gemini-3.1-flash-lite', 
-        'models/gemini-flash-latest'
+        'models/gemini-2.5-flash',
+        'models/gemini-2.0-flash'
     ]
     
     for model_name in target_models:
         try:
             model = genai.GenerativeModel(model_name)
-            # تعریف شخصیت برای رکسانا
-            prompt = f"تو 'رکسانا' هستی، یک دستیار هوشمند، صمیمی و بسیار حرفه‌ای. پاسخ بده: {update.message.text}"
+            prompt = f"تو 'رکسانا' هستی، یک دستیار هوشمند و صمیمی. پاسخ بده: {update.message.text}"
             response = model.generate_content(prompt)
             
             if response and response.text:
                 await update.message.reply_text(response.text)
                 return 
-        except Exception as e:
-            print(f"تلاش با {model_name} ناموفق بود: {e}")
+        except Exception:
             continue
 
-    await update.message.reply_text("🔴 متاسفانه مدل‌های جدید گوگل هنوز در ریجن شما فعال نشده‌اند. لحظاتی دیگر تلاش کنید.")
+    await update.message.reply_text("🔴 خطا در اتصال به مدل‌های جدید. لطفاً لحظاتی دیگر تلاش کنید.")
 
-# ۴. اجرای برنامه
+# ۴. اجرا
 if __name__ == '__main__':
-    # بیدار نگه داشتن پورت رندر
     threading.Thread(target=run_health_check, daemon=True).start()
-    
-    # راه‌اندازی تلگرام
     app = Application.builder().token(TELEGRAM_TOKEN).build()
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
-    
-    # پاکسازی آپدیت‌های معلق برای جلوگیری از Conflict
     app.run_polling(drop_pending_updates=True)
