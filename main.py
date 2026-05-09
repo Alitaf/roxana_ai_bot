@@ -29,7 +29,7 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 genai.configure(api_key=GEMINI_KEY)
 
 # استفاده از مدل gemini-1.5-flash با نام کامل برای جلوگیری از خطای 404
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-pro')
 
 # ۴. تابع پردازش پیام‌های تلگرام
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
