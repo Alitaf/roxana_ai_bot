@@ -5,12 +5,13 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 # ۱. لیست محصولات سایت رکسانا (برای تست)
 # می‌توانید نام، قیمت و لینک واقعی محصولات وردپرسی خود را اینجا وارد کنید
-ROXANA_PRODUCTS = """
-لیست محصولات موجود در فروشگاه رکسانا:
-1. کرم پودر مات رکسانا - مناسب پوست‌های چرب - قیمت: ۲۵۰,۰۰۰ تومان - لینک: https://roxana.shop/product/foundation
-2. ریمل حجم‌دهنده ضدآب - ماندگاری ۲۴ ساعته - قیمت: ۱۸۰,۰۰۰ تومان - لینک: https://roxana.shop/product/mascara
-3. پالت سایه چشم ۱۲ رنگ - رنگ‌های نود و شاین - قیمت: ۳۲۰,۰۰۰ تومان - لینک: https://roxana.shop/product/eyeshadow
-4. سرم آبرسان هیالورونیک اسید - جوانساز پوست - قیمت: ۴۵۰,۰۰۰ تومان - لینک: https://roxana.shop/product/serum
+ROXANA_PRODUCTS = """ROXANA_PRODUCTS = """
+List of available products in Roxana Store:
+1. Helen Seward Alchemy - for intensive nutri-hydration of lengths and ends - Price: 47,00 Dhs - Link: https://roxanacosmetic.com/product/alchemy-oil-30ml/?v=b6bb43df4525
+2. Waterproof Volumizing Mascara - 24-hour durability - Price: 180,000 Tomans - Link: https://roxana.shop/product/mascara
+3. 12-Color Eyeshadow Palette - Nude and Shine colors - Price: 320,000 Tomans - Link: https://roxana.shop/product/eyeshadow
+4. Hyaluronic Acid Hydrating Serum - Skin rejuvenator - Price: 450,000 Tomans - Link: https://roxana.shop/product/serum
+"""
 """
 
 # ۲. سرور سلامت برای رندر
