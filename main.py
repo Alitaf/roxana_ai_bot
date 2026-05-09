@@ -3,30 +3,57 @@ from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-def run_health():
-    server = HTTPServer(('0.0.0.0', int(os.environ.get("PORT", 10000))), BaseHTTPRequestHandler)
+# ۱. سرور سلامت برای رندر
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Roxana v3.1 is Online")
+
+def run_health_check():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
     server.serve_forever()
 
+# ۲. تنظیمات API
 genai.configure(api_key=os.getenv("GEMINI_KEY"))
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 
-async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
+# ۳. پردازشگر هوشمند بر اساس لیست مدل‌های اختصاصی شما
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.text: return
     
-    # استفاده از مدل پایدار و تست شده
-    try:
-        model = genai.GenerativeModel('gemini-1.5-flash-8b') # این نسخه سبک‌تر و بسیار پایدارتر است
-        response = model.generate_content(update.message.text)
-        await update.message.reply_text(response.text)
-    except Exception as e:
-        # اگر باز هم خطا داد، دقیقاً مدل‌های در دسترس کلید شما را چاپ می‌کند
+    # استفاده از دقیق‌ترین نام‌ها از لیست مجاز شما (May 2026)
+    target_models = [
+        'models/gemini-2.0-flash', 
+        'models/gemini-3.1-flash-lite', 
+        'models/gemini-flash-latest'
+    ]
+    
+    for model_name in target_models:
         try:
-            available = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-            await update.message.reply_text(f"گوگل لجبازی می‌کند. مدل‌های مجاز شما: {available}")
-        except:
-            await update.message.reply_text(f"خطای نهایی: {str(e)[:100]}")
+            model = genai.GenerativeModel(model_name)
+            # تعریف شخصیت برای رکسانا
+            prompt = f"تو 'رکسانا' هستی، یک دستیار هوشمند، صمیمی و بسیار حرفه‌ای. پاسخ بده: {update.message.text}"
+            response = model.generate_content(prompt)
+            
+            if response and response.text:
+                await update.message.reply_text(response.text)
+                return 
+        except Exception as e:
+            print(f"تلاش با {model_name} ناموفق بود: {e}")
+            continue
 
+    await update.message.reply_text("🔴 متاسفانه مدل‌های جدید گوگل هنوز در ریجن شما فعال نشده‌اند. لحظاتی دیگر تلاش کنید.")
+
+# ۴. اجرای برنامه
 if __name__ == '__main__':
-    threading.Thread(target=run_health, daemon=True).start()
-    app = Application.builder().token(os.getenv("TELEGRAM_TOKEN")).build()
-    app.add_handler(MessageHandler(filters.TEXT, handle))
+    # بیدار نگه داشتن پورت رندر
+    threading.Thread(target=run_health_check, daemon=True).start()
+    
+    # راه‌اندازی تلگرام
+    app = Application.builder().token(TELEGRAM_TOKEN).build()
+    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
+    
+    # پاکسازی آپدیت‌های معلق برای جلوگیری از Conflict
     app.run_polling(drop_pending_updates=True)
