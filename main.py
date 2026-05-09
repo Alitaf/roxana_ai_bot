@@ -28,8 +28,21 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 # ۳. پیکربندی هوش مصنوعی گوگل
 genai.configure(api_key=GEMINI_KEY)
 
-# استفاده از مدل gemini-1.5-flash با نام کامل برای جلوگیری از خطای 404
-model = genai.GenerativeModel('gemini-pro')
+# --- تنظیمات هوشمند مدل ---
+try:
+    # پیدا کردن اولین مدل در دسترس که قابلیت تولید متن دارد
+    available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+    if available_models:
+        selected_model_name = available_models[0] # معمولاً اولین مورد gemini-pro یا gemini-1.5-flash است
+        print(f"✅ مدل انتخاب شده: {selected_model_name}")
+        model = genai.GenerativeModel(selected_model_name)
+    else:
+        print("❌ هیچ مدلی پیدا نشد!")
+        model = genai.GenerativeModel('gemini-pro') # مقدار پیش‌فرض
+except Exception as e:
+    print(f"⚠️ خطا در لیست کردن مدل‌ها: {e}")
+    model = genai.GenerativeModel('gemini-pro')
+# ------------------------
 
 # ۴. تابع پردازش پیام‌های تلگرام
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
