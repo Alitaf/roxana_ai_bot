@@ -10,28 +10,20 @@ def run_health():
 genai.configure(api_key=os.getenv("GEMINI_KEY"))
 
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not update.message.text: return
+    if not update.message or not update.message.text: return
     
-    # لیست تمام نام‌های ممکن برای مدل که گوگل ممکن است بپذیرد
-    possible_models = [
-        'gemini-1.5-flash', 
-        'models/gemini-1.5-flash', 
-        'gemini-pro', 
-        'models/gemini-pro'
-    ]
-    
-    for model_name in possible_models:
+    # استفاده از مدل پایدار و تست شده
+    try:
+        model = genai.GenerativeModel('gemini-1.5-flash-8b') # این نسخه سبک‌تر و بسیار پایدارتر است
+        response = model.generate_content(update.message.text)
+        await update.message.reply_text(response.text)
+    except Exception as e:
+        # اگر باز هم خطا داد، دقیقاً مدل‌های در دسترس کلید شما را چاپ می‌کند
         try:
-            model = genai.GenerativeModel(model_name)
-            response = model.generate_content(update.message.text)
-            if response and response.text:
-                await update.message.reply_text(response.text)
-                return # به محض اینکه یکی جواب داد، خارج شو
-        except Exception as e:
-            print(f"تلاش با {model_name} شکست خورد.")
-            continue # برو سراغ نام بعدی مدل
-
-    await update.message.reply_text("🔴 متاسفانه گوگل در این لحظه پاسخگو نیست. لطفاً چند لحظه دیگر پیام دهید.")
+            available = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+            await update.message.reply_text(f"گوگل لجبازی می‌کند. مدل‌های مجاز شما: {available}")
+        except:
+            await update.message.reply_text(f"خطای نهایی: {str(e)[:100]}")
 
 if __name__ == '__main__':
     threading.Thread(target=run_health, daemon=True).start()
