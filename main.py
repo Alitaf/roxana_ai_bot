@@ -9,4 +9,5 @@ if __name__ == '__main__':
     token = os.getenv("TELEGRAM_TOKEN")
     app = Application.builder().token(token).build()
     app.add_handler(MessageHandler(filters.TEXT, echo))
-    app.run_polling()
+    # خط آخر را به این شکل تغییر دهید:
+app.run_polling(drop_pending_updates=True)
