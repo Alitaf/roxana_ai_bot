@@ -5,7 +5,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 # ۱. لیست محصولات سایت رکسانا (برای تست)
 # می‌توانید نام، قیمت و لینک واقعی محصولات وردپرسی خود را اینجا وارد کنید
-ROXANA_PRODUCTS = """ROXANA_PRODUCTS = """
+ROXANA_PRODUCTS = """
 List of available products in Roxana Store:
 1. Helen Seward Alchemy - for intensive nutri-hydration of lengths and ends - Price: 47,00 Dhs - Link: https://roxanacosmetic.com/product/alchemy-oil-30ml/?v=b6bb43df4525
 2. Waterproof Volumizing Mascara - 24-hour durability - Price: 180,000 Tomans - Link: https://roxana.shop/product/mascara
