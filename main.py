@@ -33,7 +33,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f"User sent: {user_text}")
 
     # مدل‌ها با پیشوند دقیق models/ (حل مشکل خطای 404)
-    model_names = ['models/gemini-1.5-flash', 'models/gemini-1.5-pro']
+    model_names = ['gemini-1.5-flash-latest', 'gemini-1.5-pro-latest']
     
     for name in model_names:
         try:
