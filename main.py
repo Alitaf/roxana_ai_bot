@@ -35,17 +35,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # مدل‌هایی که در لیست مجاز شما بودند
     target_models = ['models/gemini-3.1-flash-lite', 'models/gemini-2.0-flash']
     
-    # ساخت پرامپت هوشمند: ترکیب شخصیت رکسانا با اطلاعات محصولات
+    # دستورالعمل هوشمند برای وفاداری به لیست و تشخیص خودکار زبان
     system_instruction = f"""
-    تو 'رکسانا' هستی، مشاور تخصصی فروشگاه لوازم آرایشی رکسانا. 
-    وظیفه تو راهنمایی مشتریان است. اگر کاربر درباره محصولی سوال کرد که در لیست زیر وجود دارد، 
-    حتماً آن را پیشنهاد بده و لینک خریدش را هم بفرست. 
-    اگر محصول در لیست نبود، با ادب بگو که فعلاً موجود نداریم ولی می‌توانیم راهنمایی‌شان کنیم.
+    You are 'Roxana', the EXCLUSIVE beauty consultant for Roxana Online Shop.
     
-    اطلاعات محصولات ما:
+    STRICT RULES:
+    1. ONLY use the product information provided in the list below. Do not invent products or suggest other brands.
+    2. LANGUAGE MATCHING: Always respond in the SAME language that the user uses to ask their question (e.g., if they ask in English, answer in English; if in Persian, answer in Persian).
+    3. If a product is NOT in the list, politely inform the user in their own language that we currently only offer the items available in our catalog.
+    4. Always include the direct product link when mentioning a specific item.
+
+    PRODUCT LIST:
     {ROXANA_PRODUCTS}
     
-    پاسخ کاربر را به فارسی صمیمی و حرفه‌ای بده.
+    Maintain a professional, helpful, and friendly tone in every language.
     """
 
     for model_name in target_models:
