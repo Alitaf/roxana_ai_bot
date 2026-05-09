@@ -3,24 +3,35 @@ from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-# سرور سلامت برای رندر
 def run_health():
     server = HTTPServer(('0.0.0.0', int(os.environ.get("PORT", 10000))), BaseHTTPRequestHandler)
     server.serve_forever()
 
-# تنظیمات
 genai.configure(api_key=os.getenv("GEMINI_KEY"))
 
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message.text: return
-    try:
-        # تست مستقیم با آخرین مدل گوگل
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(update.message.text)
-        await update.message.reply_text(response.text)
-    except Exception as e:
-        # اینجا دقیقاً می‌فهمیم مشکل گوگل چیست
-        await update.message.reply_text(f"🔴 خطای واقعی: {str(e)[:200]}")
+    
+    # لیست تمام نام‌های ممکن برای مدل که گوگل ممکن است بپذیرد
+    possible_models = [
+        'gemini-1.5-flash', 
+        'models/gemini-1.5-flash', 
+        'gemini-pro', 
+        'models/gemini-pro'
+    ]
+    
+    for model_name in possible_models:
+        try:
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(update.message.text)
+            if response and response.text:
+                await update.message.reply_text(response.text)
+                return # به محض اینکه یکی جواب داد، خارج شو
+        except Exception as e:
+            print(f"تلاش با {model_name} شکست خورد.")
+            continue # برو سراغ نام بعدی مدل
+
+    await update.message.reply_text("🔴 متاسفانه گوگل در این لحظه پاسخگو نیست. لطفاً چند لحظه دیگر پیام دهید.")
 
 if __name__ == '__main__':
     threading.Thread(target=run_health, daemon=True).start()
