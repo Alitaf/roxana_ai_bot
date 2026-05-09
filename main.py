@@ -12,7 +12,6 @@ List of available products in Roxana Store:
 3. 12-Color Eyeshadow Palette - Nude and Shine colors - Price: 320,000 Tomans - Link: https://roxana.shop/product/eyeshadow
 4. Hyaluronic Acid Hydrating Serum - Skin rejuvenator - Price: 450,000 Tomans - Link: https://roxana.shop/product/serum
 """
-"""
 
 # ۲. سرور سلامت برای رندر
 class HealthCheckHandler(BaseHTTPRequestHandler):
