@@ -7,10 +7,10 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 # می‌توانید نام، قیمت و لینک واقعی محصولات وردپرسی خود را اینجا وارد کنید
 ROXANA_PRODUCTS = """
 List of available products in Roxana Store:
-1. Helen Seward Alchemy - for intensive nutri-hydration of lengths and ends - Price: 47,00 Dhs - Link: https://roxanacosmetic.com/product/alchemy-oil-30ml/?v=b6bb43df4525
-2. Waterproof Volumizing Mascara - 24-hour durability - Price: 180,000 Tomans - Link: https://roxana.shop/product/mascara
-3. 12-Color Eyeshadow Palette - Nude and Shine colors - Price: 320,000 Tomans - Link: https://roxana.shop/product/eyeshadow
-4. Hyaluronic Acid Hydrating Serum - Skin rejuvenator - Price: 450,000 Tomans - Link: https://roxana.shop/product/serum
+1. Helen Seward Alchemy - for intensive nutri-hydration of lengths and ends - Price: 47.00 Dhs - Link: https://roxanacosmetic.com/product/alchemy-oil-30ml/?v=b6bb43df4525
+2. Helen Seward Crystal Wax - Modeling wax with a glossy effect gives extreme definition and shine. - Price: 78.00 Dhs - Link: https://roxanacosmetic.com/product/crystal-wax-100-ml/?v=b6bb43df4525
+3. Helen Seward Hydra Conditioner - Conditioner for colored and treated hair - Price: 54.00 Dhs - Link: https://roxanacosmetic.com/product/hydra-conditioner-300ml/?v=b6bb43df4525
+4. Helen Seward Hydra Shampoo - Shampoo for colored and damaged hair - Price: 49.00 Dhs - Link: https://roxanacosmetic.com/product/hydra-shampoo-300ml/?v=b6bb43df4525
 """
 
 # ۲. سرور سلامت برای رندر
