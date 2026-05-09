@@ -2,81 +2,51 @@ import os
 import google.generativeai as genai
 from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
-from http.server import BaseHTTPRequestHandler, HTTPServer
 import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
-# ۱. تنظیمات سرور برای رفع مشکل پورت در Render (پلن رایگان)
+# ۱. سرور سلامت برای رندر (Port Binding)
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b"Roxana Bot is Live!")
+        self.wfile.write(b"Bot is Running")
 
-    def log_message(self, format, *args):
-        return # برای خلوت ماندن لاگ‌ها، پیام‌های سرور را چاپ نمی‌کنیم
-
-def run_health_check_server():
-    port = int(os.environ.get("PORT", 8080))
+def run_health_check():
+    port = int(os.environ.get("PORT", 10000))
     server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
-    print(f"Health check server started on port {port}")
     server.serve_forever()
 
-# ۲. دریافت کلیدها از تنظیمات Render (بدون نمایش مستقیم در کد)
+# ۲. پیکربندی APIها
 GEMINI_KEY = os.getenv("GEMINI_KEY")
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-
-# ۳. پیکربندی هوش مصنوعی گوگل
 genai.configure(api_key=GEMINI_KEY)
 
-# --- تنظیمات هوشمند مدل ---
-try:
-    # پیدا کردن اولین مدل در دسترس که قابلیت تولید متن دارد
-    available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-    if available_models:
-        selected_model_name = available_models[0] # معمولاً اولین مورد gemini-pro یا gemini-1.5-flash است
-        print(f"✅ مدل انتخاب شده: {selected_model_name}")
-        model = genai.GenerativeModel(selected_model_name)
-    else:
-        print("❌ هیچ مدلی پیدا نشد!")
-        model = genai.GenerativeModel('gemini-pro') # مقدار پیش‌فرض
-except Exception as e:
-    print(f"⚠️ خطا در لیست کردن مدل‌ها: {e}")
-    model = genai.GenerativeModel('gemini-pro')
-# ------------------------
+# ۳. استفاده از نام عمومی مدل برای سازگاری حداکثری
+model = genai.GenerativeModel('gemini-1.5-flash')
 
-# ۴. تابع پردازش پیام‌های تلگرام
+# ۴. تابع پردازش پیام
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not update.message or not update.message.text:
-        return
-
-    user_text = update.message.text
-    print(f"Received message: {user_text}") # نمایش پیام در لاگ رندر
-
+    if not update.message or not update.message.text: return
     try:
-        # ارسال پیام به هوش مصنوعی با تعیین نقش
-        prompt = f"تو مشاور هوشمند برند آرایشی و جواهرات رکسانا هستی. با لحنی محترمانه و صمیمی پاسخ بده: {user_text}"
-        response = model.generate_content(prompt)
-        
+        # استفاده از مدل به صورت مستقیم
+        response = model.generate_content(f"تو دستیار رکسانا هستی: {update.message.text}")
         await update.message.reply_text(response.text)
-        print("Response sent successfully.")
-        
     except Exception as e:
-        print(f"Error in Gemini or Telegram: {e}")
-        await update.message.reply_text("عذرخواهی می‌کنم، در حال حاضر ارتباط من با سیستم مرکزی قطع شده است. لطفاً کمی بعد دوباره تلاش کنید.")
+        print(f"Error: {e}")
+        # اگر دوباره خطا داد، با مدل جایگزین تست کن
+        try:
+            alt_model = genai.GenerativeModel('gemini-pro')
+            response = alt_model.generate_content(update.message.text)
+            await update.message.reply_text(response.text)
+        except:
+            await update.message.reply_text("در حال به‌روزرسانی سیستم هستم، لطفاً لحظاتی دیگر پیام دهید.")
 
-# ۵. بخش اصلی اجرای برنامه
 if __name__ == '__main__':
-    print("Starting Roxana AI Bot...")
+    # اجرای سرور سلامت در پس‌زمینه
+    threading.Thread(target=run_health_check, daemon=True).start()
     
-    if not TELEGRAM_TOKEN or not GEMINI_KEY:
-        print("❌ ERROR: Environment variables (TOKEN/KEY) not found!")
-    else:
-        # الف: اجرای سرور سلامت در یک رشته (Thread) جداگانه
-        threading.Thread(target=run_health_check_server, daemon=True).start()
-        
-        # ب: اجرای بات تلگرام
-        app = Application.builder().token(TELEGRAM_TOKEN).build()
-        app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
-        
-        print("Bot is polling...")
-        app.run_polling()
+    # اجرای بات تلگرام
+    app = Application.builder().token(TELEGRAM_TOKEN).build()
+    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
+    app.run_polling()
